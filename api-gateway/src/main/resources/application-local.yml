@@ -12,4 +12,4 @@ spring:
         - id: order-service
           uri: http://localhost:8081
           predicates:
-            - Path=/orders/**
+            - Path=/test/**
