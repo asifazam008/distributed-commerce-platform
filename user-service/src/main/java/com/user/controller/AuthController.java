@@ -1,12 +1,12 @@
-package controller;
+package com.user.controller;
 
 
-import dto.RegisterRequest;
+import com.user.dto.RegisterRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import services.UserService;
+import com.user.services.UserService;
 
 @RestController
 @RequestMapping("/api/auth")

@@ -1,11 +1,11 @@
-package services;
+package com.user.services;
 
-import dto.RegisterRequest;
+import com.user.dto.RegisterRequest;
+import com.user.entity.User;
+import com.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
