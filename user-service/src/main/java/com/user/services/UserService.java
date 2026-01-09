@@ -2,10 +2,10 @@ package com.user.services;
 
 import com.user.dto.RegisterRequest;
 import com.user.entity.User;
+import com.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor

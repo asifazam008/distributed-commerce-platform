@@ -1,6 +1,5 @@
 package com.user.controller;
 
-
 import com.user.dto.RegisterRequest;
 import com.user.services.UserService;
 import jakarta.validation.Valid;
