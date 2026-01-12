@@ -1,5 +1,6 @@
 package com.order_service.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -16,7 +17,7 @@ public class Order {
 
     @Id
     @GeneratedValue
-    private UUID id;   // ✅ was String before
+    private UUID id;
 
     private String customerId;
 
@@ -29,6 +30,8 @@ public class Order {
     private LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<OrderItem> items = new ArrayList<>();
+
 }
 
