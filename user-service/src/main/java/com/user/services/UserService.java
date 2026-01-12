@@ -1,18 +1,13 @@
 package com.user.services;
 
+import com.user.dto.LoginRequest;
 import com.user.dto.RegisterRequest;
 import com.user.entity.User;
-<<<<<<< HEAD
+import com.user.repository.UserRepository;
+import com.user.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.user.repository.UserRepository;
-=======
-import com.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
->>>>>>> 8e7ecc5cb59e58f63523d304fecd58d5a6af6b9c
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +15,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public void register(RegisterRequest request) {
 
@@ -36,5 +32,16 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+    }
+    public String login(LoginRequest request) {
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
+        return jwtService.generateToken(user.getEmail());
+
     }
 }

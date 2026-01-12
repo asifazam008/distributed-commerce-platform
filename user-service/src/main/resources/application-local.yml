@@ -14,14 +14,17 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    open-in-view: false
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
 
-  jackson:
-    serialization:
-      indent-output: true
+jwt:
+  secret: dev-secret-key-change-later-1234567890123456
+  expiration: 86400000
+
 
 logging:
   level:
