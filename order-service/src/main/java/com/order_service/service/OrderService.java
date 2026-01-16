@@ -95,14 +95,16 @@ public class OrderService {
 // DELETE ITEM FROM ORDER
 // ==========================
     public Order deleteItem(UUID orderId, UUID itemId) {
+
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        OrderItem item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new RuntimeException("Item not found"));
+        OrderItem item = order.getItems().stream()
+                .filter(i -> i.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Item not found in this order"));
 
         order.getItems().remove(item);
-        itemRepository.delete(item);
 
         BigDecimal newTotal = order.getItems().stream()
                 .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
@@ -112,5 +114,67 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         return repository.save(order);
+    }
+
+    public Order updateItem(UUID orderId, UUID itemId, int qty, BigDecimal price) {
+
+        Order order = repository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        OrderItem item = order.getItems().stream()
+                .filter(i -> i.getId().equals(itemId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException());
+
+        item.setQuantity(qty);
+        item.setPrice(price);
+
+        BigDecimal total = order.getItems().stream()
+                .map(i -> i.getPrice().multiply(BigDecimal.valueOf(i.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        order.setTotalAmount(total);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return repository.save(order);
+    }
+
+    public Order cancelOrder(UUID orderId) {
+        Order order = repository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if(order.getStatus() == OrderStatus.CANCELLED);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return order;
+    }
+
+    public Order clearAllItems(UUID orderId) {
+        Order order = repository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.getItems().clear();
+        order.setTotalAmount(BigDecimal.ZERO);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        return repository.save(order);
+    }
+
+
+    public List<Order> findByCustomer(String customerId) {
+        return repository.findByCustomerId(customerId);
+    }
+
+    public List<Order> findByStatus(String status) {
+
+        OrderStatus orderStatus = OrderStatus.valueOf(status.toUpperCase());
+        return repository.findByStatus(orderStatus);
+    }
+
+    public BigDecimal getTotalAmount(UUID orderId) {
+
+        Order order = repository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        return order.getTotalAmount();
     }
 }

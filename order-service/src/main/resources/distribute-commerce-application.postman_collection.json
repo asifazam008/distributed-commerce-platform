@@ -1,0 +1,190 @@
+{
+	"info": {
+		"_postman_id": "9b45b822-13cb-42ca-a365-de45bdf00b3c",
+		"name": "distribute-commerce-application",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29884202"
+	},
+	"item": [
+		{
+			"name": "order-service",
+			"item": [
+				{
+					"name": "Find-One-order",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}:{{orderPort}}/orders/find/8d7ab5c8-29e8-4a3a-9d14-c072d41e718d",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{orderPort}}",
+							"path": [
+								"orders",
+								"find",
+								"8d7ab5c8-29e8-4a3a-9d14-c072d41e718d"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Find-All-orders",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{host}}:{{orderPort}}/orders/findAll",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{orderPort}}",
+							"path": [
+								"orders",
+								"findAll"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Order",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{orderPort}}/orders?customerId=CUST-1002",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{orderPort}}",
+							"path": [
+								"orders"
+							],
+							"query": [
+								{
+									"key": "customerId",
+									"value": "CUST-1002"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add item to order",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{orderPort}}/orders/9504d4dc-b161-4fe3-88f7-6d32ad34c375/items?productId=PROD-10&qty=2&price=499.50",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{orderPort}}",
+							"path": [
+								"orders",
+								"9504d4dc-b161-4fe3-88f7-6d32ad34c375",
+								"items"
+							],
+							"query": [
+								{
+									"key": "productId",
+									"value": "PROD-10"
+								},
+								{
+									"key": "qty",
+									"value": "2"
+								},
+								{
+									"key": "price",
+									"value": "499.50"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pay Order",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{orderPort}}/orders/9504d4dc-b161-4fe3-88f7-6d32ad34c375/pay",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{orderPort}}",
+							"path": [
+								"orders",
+								"9504d4dc-b161-4fe3-88f7-6d32ad34c375",
+								"pay"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete item",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{host}}:{{orderPort}}/orders/9504d4dc-b161-4fe3-88f7-6d32ad34c375/items/a33e7401-dfee-41b2-be61-fdac4c0cd4cd/delete",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{orderPort}}",
+							"path": [
+								"orders",
+								"9504d4dc-b161-4fe3-88f7-6d32ad34c375",
+								"items",
+								"a33e7401-dfee-41b2-be61-fdac4c0cd4cd",
+								"delete"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
