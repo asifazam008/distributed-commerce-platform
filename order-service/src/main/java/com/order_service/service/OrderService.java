@@ -48,6 +48,11 @@ public class OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+//        New Validation: Prevent adding items to a PAID order
+        if(order.getStatus() == OrderStatus.PAID){
+            throw new RuntimeException("Cannot add items to a paid order");
+        }
+
         OrderItem item = new OrderItem();
         item.setProductId(productId);
         item.setQuantity(qty);
@@ -99,6 +104,10 @@ public class OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
+        if(order.getStatus() == OrderStatus.PAID){
+            throw new RuntimeException("Cannot delete item from a paid order");
+        }
+
         OrderItem item = order.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
                 .findFirst()
@@ -120,6 +129,10 @@ public class OrderService {
 
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() == OrderStatus.PAID){
+            throw new RuntimeException("Cannot update item in a paid order");
+        }
 
         OrderItem item = order.getItems().stream()
                 .filter(i -> i.getId().equals(itemId))
