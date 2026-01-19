@@ -17,7 +17,10 @@ public class JwtFilter implements GlobalFilter {
         String path = exchange.getRequest().getURI().getPath();
 
         // Allow health & test endpoints
-        if (path.startsWith("/actuator") || path.startsWith("/public")) {
+        if (path.startsWith("/actuator")
+                || path.startsWith("/public")
+                || path.startsWith("/orders")
+                || path.startsWith("/auth")) {     // 👈 ALLOW ORDER SERVICE FOR NOW
             return chain.filter(exchange);
         }
 

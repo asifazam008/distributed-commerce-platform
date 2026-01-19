@@ -1,15 +1,41 @@
 server:
   port: 8080
 
-logging:
-  level:
-    root: INFO
-
 spring:
+  application:
+    name: api-gateway
+
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
       routes:
         - id: order-service
-          uri: http://localhost:8081
+          uri: lb://order-service
           predicates:
-            - Path=/test/**
+            - Path=/orders/**
+
+        - id: authentication-service
+          uri: lb://authentication-service
+          predicates:
+            - Path=/auth/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
