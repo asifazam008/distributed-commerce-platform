@@ -49,7 +49,8 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
 //        New Validation: Prevent adding items to a PAID order
-        if(order.getStatus() == OrderStatus.PAID){
+
+        if (order.getStatus() == OrderStatus.PAID) {
             throw new RuntimeException("Cannot add items to a paid order");
         }
 
@@ -81,30 +82,24 @@ public class OrderService {
         return repository.save(order);
     }
 
-    // ==========================
-// FIND ONE ORDER
-// ==========================
+    // ========================== FIND ONE ORDER ==========================
     public Order findOrder(UUID orderId) {
         return repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
-    // ==========================
-// FIND ALL ORDERS
-// ==========================
+    // ========================== FIND ALL ORDERS ==========================
     public List<Order> findAllOrders() {
         return repository.findAll();
     }
 
-    // ==========================
-// DELETE ITEM FROM ORDER
-// ==========================
+    // ========================== DELETE ITEM FROM ORDER ==========================
     public Order deleteItem(UUID orderId, UUID itemId) {
 
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if(order.getStatus() == OrderStatus.PAID){
+        if (order.getStatus() == OrderStatus.PAID) {
             throw new RuntimeException("Cannot delete item from a paid order");
         }
 
@@ -130,7 +125,7 @@ public class OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if (order.getStatus() == OrderStatus.PAID){
+        if (order.getStatus() == OrderStatus.PAID) {
             throw new RuntimeException("Cannot update item in a paid order");
         }
 
@@ -156,7 +151,7 @@ public class OrderService {
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
 
-        if(order.getStatus() == OrderStatus.CANCELLED);
+        if (order.getStatus() == OrderStatus.CANCELLED) ;
         order.setUpdatedAt(LocalDateTime.now());
 
         return order;
@@ -188,6 +183,10 @@ public class OrderService {
 
         Order order = repository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (order.getStatus() == OrderStatus.CANCELLED) {
+            throw new RuntimeException("Cannot get total amount of a cancelled order");
+        }
         return order.getTotalAmount();
     }
 }
