@@ -117,4 +117,9 @@ public class OrderController {
     public BigDecimal getTotal(@RequestBody IdRequest request){
         return service.getTotalAmount(request.getId());
     }
+
+    @GetMapping("/health")
+    public String health() {
+        return "Order Service is UP";
+    }
 }

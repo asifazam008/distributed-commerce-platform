@@ -13,11 +13,25 @@ spring:
           lower-case-service-id: true
 
       routes:
+
+        # Order Service Route with Resilience
         - id: order-service
           uri: lb://order-service
           predicates:
             - Path=/orders/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: orderServiceCircuitBreaker
+                fallbackUri: forward:/fallback/orders
 
+            - name: Retry
+              args:
+                retries: 3
+                statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
+                methods: GET, POST
+
+        # Authentication Service Route
         - id: authentication-service
           uri: lb://authentication-service
           predicates:
@@ -43,3 +57,21 @@ logging:
 
 jwt:
   secret: MyVeryStrongAndSuperLongSecretKeyForJWTGeneration2026!
+
+# Resilience4j Configuration
+resilience4j:
+  circuitbreaker:
+    instances:
+      orderServiceCircuitBreaker:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+  timelimiter:
+    instances:
+      orderServiceCircuitBreaker:
+        timeoutDuration: 5s
