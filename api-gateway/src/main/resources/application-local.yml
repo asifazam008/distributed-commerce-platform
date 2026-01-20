@@ -38,4 +38,8 @@ management:
 
 logging:
   level:
-    org.springframework.cloud.gateway: DEBUG
+    com.apigateway.security: DEBUG
+    org.springframework.cloud.gateway: INFO
+
+jwt:
+  secret: MyVeryStrongAndSuperLongSecretKeyForJWTGeneration2026!
