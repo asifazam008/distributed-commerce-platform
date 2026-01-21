@@ -7,71 +7,66 @@ spring:
 
   cloud:
     gateway:
+
+      # ================= DISCOVERY LOCATOR =================
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
 
+      # ================= HTTP CLIENT CONFIG =================
+      httpclient:
+        response-timeout: 30s
+
+      # ================= DEFAULT FILTERS =================
+      default-filters:
+        - RemoveResponseHeader=Transfer-Encoding
+
+      # ================= STATIC ROUTES =================
       routes:
 
-        # Order Service Route with Resilience
-        - id: order-service
-          uri: lb://order-service
-          predicates:
-            - Path=/orders/**
-          filters:
-            - name: CircuitBreaker
-              args:
-                name: orderServiceCircuitBreaker
-                fallbackUri: forward:/fallback/orders
-
-            - name: Retry
-              args:
-                retries: 3
-                statuses: BAD_GATEWAY, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT
-                methods: GET, POST
-
-        # Authentication Service Route
-        - id: authentication-service
+        # -------- AUTH SERVICE --------
+        - id: auth-service
           uri: lb://authentication-service
           predicates:
             - Path=/auth/**
 
+        # -------- ORDER SERVICE --------
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/orders/**
+
+        # -------- USER SERVICE --------
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+
+# ================= JWT CONFIG =================
+jwt:
+  secret: MyVeryStrongAndSuperLongSecretKeyForJWTGeneration2026!
+
+# ================= EUREKA CONFIG =================
 eureka:
   client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
 
+# ================= LOGGING =================
+logging:
+  level:
+    root: INFO
+    com.apigateway.security: DEBUG
+    org.springframework.cloud.gateway: INFO
+
+# ================= ACTUATOR =================
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
-
-logging:
-  level:
-    com.apigateway.security: DEBUG
-    org.springframework.cloud.gateway: INFO
-
-jwt:
-  secret: MyVeryStrongAndSuperLongSecretKeyForJWTGeneration2026!
-
-# Resilience4j Configuration
-resilience4j:
-  circuitbreaker:
-    instances:
-      orderServiceCircuitBreaker:
-        registerHealthIndicator: true
-        slidingWindowSize: 10
-        minimumNumberOfCalls: 5
-        permittedNumberOfCallsInHalfOpenState: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 10s
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-
-  timelimiter:
-    instances:
-      orderServiceCircuitBreaker:
-        timeoutDuration: 5s
+        include: health,info

@@ -29,7 +29,8 @@ public class JwtFilter implements GlobalFilter {
             "/auth/refresh-token",
             "/actuator",
             "/public",
-            "/orders/health"
+            "/orders/health",
+            "/users/health"
     );
 
     @Override
