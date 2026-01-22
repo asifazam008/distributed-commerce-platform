@@ -13,12 +13,20 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update   # TEMP (Flyway later)
+#      ddl-auto: update   # TEMP (Flyway later)
+      ddl-auto: validate
     open-in-view: false
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+
+  flyway:
+    enabled: true
+    schemas: user_schema
+    default-schema: user_schema
+    baseline-on-migrate: true
+    locations: classpath:db/migration
 
 # ✅ ENABLE EUREKA (LOCAL)
 eureka:

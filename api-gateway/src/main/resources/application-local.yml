@@ -22,7 +22,7 @@ spring:
       default-filters:
         - RemoveResponseHeader=Transfer-Encoding
 
-      # ================= STATIC ROUTES =================
+      # ================= ROUTES =================
       routes:
 
         # -------- AUTH SERVICE --------
@@ -37,8 +37,17 @@ spring:
           predicates:
             - Path=/orders/**
 
-        # -------- USER SERVICE --------
-        - id: user-service
+        # 🔐 USER INTERNAL APIS (MUST COME FIRST)
+        - id: user-internal
+          uri: lb://user-service
+          predicates:
+            - Path=/users/internal/**
+          filters:
+            - StripPrefix=1
+            - AddRequestHeader=X-Internal-Call, true
+
+        # 🔓 USER PUBLIC APIS
+        - id: user-public
           uri: lb://user-service
           predicates:
             - Path=/users/**
@@ -54,8 +63,10 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
   instance:
     prefer-ip-address: true
+    instance-id: ${spring.application.name}:${server.port}
 
 # ================= LOGGING =================
 logging:
