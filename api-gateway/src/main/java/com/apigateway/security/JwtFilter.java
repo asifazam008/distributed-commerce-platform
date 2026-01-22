@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Component
@@ -22,12 +23,14 @@ public class JwtFilter implements GlobalFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    private static final List<String> EXCLUDED_PATHS = List.of(
+    private static final List<String> PUBLIC_URLS = Arrays.asList(
             "/auth/login",
             "/auth/register",
             "/auth/refresh-token",
             "/actuator",
-            "/public"
+            "/public",
+            "/orders/health",
+            "/users/health"
     );
 
     @Override
@@ -35,10 +38,13 @@ public class JwtFilter implements GlobalFilter {
 
         String path = exchange.getRequest().getURI().getPath();
 
+        if (PUBLIC_URLS.contains(path)) {
+            return chain.filter(exchange);
+        }
         log.debug("JWT Filter invoked for path: {}", path);
 
         // Skip public endpoints
-        if (EXCLUDED_PATHS.stream().anyMatch(path::startsWith)) {
+        if (PUBLIC_URLS.stream().anyMatch(path::startsWith)) {
             log.debug("Path [{}] is excluded from JWT validation", path);
             return chain.filter(exchange);
         }

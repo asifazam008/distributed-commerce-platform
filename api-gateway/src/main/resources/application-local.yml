@@ -7,39 +7,66 @@ spring:
 
   cloud:
     gateway:
+
+      # ================= DISCOVERY LOCATOR =================
       discovery:
         locator:
           enabled: true
           lower-case-service-id: true
 
+      # ================= HTTP CLIENT CONFIG =================
+      httpclient:
+        response-timeout: 30s
+
+      # ================= DEFAULT FILTERS =================
+      default-filters:
+        - RemoveResponseHeader=Transfer-Encoding
+
+      # ================= STATIC ROUTES =================
       routes:
+
+        # -------- AUTH SERVICE --------
+        - id: auth-service
+          uri: lb://authentication-service
+          predicates:
+            - Path=/auth/**
+
+        # -------- ORDER SERVICE --------
         - id: order-service
           uri: lb://order-service
           predicates:
             - Path=/orders/**
 
-        - id: authentication-service
-          uri: lb://authentication-service
+        # -------- USER SERVICE --------
+        - id: user-service
+          uri: lb://user-service
           predicates:
-            - Path=/auth/**
+            - Path=/users/**
 
+# ================= JWT CONFIG =================
+jwt:
+  secret: MyVeryStrongAndSuperLongSecretKeyForJWTGeneration2026!
+
+# ================= EUREKA CONFIG =================
 eureka:
   client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
     register-with-eureka: true
     fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
 
+# ================= LOGGING =================
+logging:
+  level:
+    root: INFO
+    com.apigateway.security: DEBUG
+    org.springframework.cloud.gateway: INFO
+
+# ================= ACTUATOR =================
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
-
-logging:
-  level:
-    com.apigateway.security: DEBUG
-    org.springframework.cloud.gateway: INFO
-
-jwt:
-  secret: MyVeryStrongAndSuperLongSecretKeyForJWTGeneration2026!
+        include: health,info
