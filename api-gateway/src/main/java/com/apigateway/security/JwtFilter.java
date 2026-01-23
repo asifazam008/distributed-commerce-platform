@@ -23,27 +23,21 @@ public class JwtFilter implements GlobalFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
-    private static final List<String> PUBLIC_URLS = Arrays.asList(
-            "/auth/login",
-            "/auth/register",
-            "/auth/refresh-token",
+    private static final List<String> PUBLIC_URLS = List.of(
+            "/auth/",
             "/actuator",
             "/public",
             "/orders/health",
-            "/users/health"
+            "/users/health",
+            "/internal"   // ✅ INTERNAL USER APIs
     );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
+        log.error(">>> RAW incoming request path = [{}]", path);
 
-        if (PUBLIC_URLS.contains(path)) {
-            return chain.filter(exchange);
-        }
-        log.debug("JWT Filter invoked for path: {}", path);
-
-        // Skip public endpoints
         if (PUBLIC_URLS.stream().anyMatch(path::startsWith)) {
             log.debug("Path [{}] is excluded from JWT validation", path);
             return chain.filter(exchange);
@@ -59,7 +53,6 @@ public class JwtFilter implements GlobalFilter {
         }
 
         String token = authHeader.substring(7);
-
         if (!jwtUtil.isTokenValid(token)) {
             log.warn("Unauthorized request to [{}] – Invalid or expired JWT token", path);
             return unauthorized(exchange);
@@ -68,26 +61,16 @@ public class JwtFilter implements GlobalFilter {
         String username = jwtUtil.extractUsername(token);
         String role = jwtUtil.extractRole(token);
 
-        log.info("Authenticated request – user: {}, role: {}, path: {}", username, role, path);
-
-        // RBAC enforcement
         boolean allowed = RbacConfig.isAccessAllowed(path, role);
-
         if (!allowed) {
-            log.warn("Access denied for user [{}] with role [{}] on path [{}]", username, role, path);
             return forbidden(exchange);
         }
 
-        log.debug("RBAC allowed for user [{}] on path [{}]", username, path);
-
-        ServerWebExchange mutatedExchange = exchange.mutate()
+        return chain.filter(exchange.mutate()
                 .request(r -> r
                         .header("X-Authenticated-User", username)
-                        .header("X-User-Role", role)
-                )
-                .build();
-
-        return chain.filter(mutatedExchange);
+                        .header("X-User-Role", role))
+                .build());
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
