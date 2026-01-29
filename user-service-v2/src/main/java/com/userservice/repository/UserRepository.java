@@ -9,10 +9,10 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("""
-        select distinct u from User u
-        left join fetch u.roles r
-        left join fetch r.permissions
-        where u.userId = :userId
+        SELECT u FROM User u
+        JOIN FETCH u.roles r
+        JOIN FETCH r.permissions
+        WHERE u.userId = :userId
     """)
     Optional<User> findWithRolesAndPermissions(String userId);
 }

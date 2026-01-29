@@ -15,10 +15,18 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Role name (ADMIN, USER, SELLER, etc.)
+     * Must be stable and unique
+     */
     @Column(nullable = false, unique = true)
-    private String name; // USER, ADMIN, SELLER
+    private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    /**
+     * Permissions granted to this role
+     * MUST be EAGER for authorization checks
+     */
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id"),
@@ -26,4 +34,3 @@ public class Role {
     )
     private Set<Permission> permissions = new HashSet<>();
 }
-

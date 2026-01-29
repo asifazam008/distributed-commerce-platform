@@ -1,14 +1,12 @@
 package com.userservice.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+@Getter
+@Builder
+@AllArgsConstructor
 public class AuthorizationResponse {
-
     private boolean allowed;
-
-    public AuthorizationResponse(boolean authorized) {
-        this.allowed = allowed;
-    }
-
-    public boolean isAllowed() {
-        return allowed;
-    }
 }

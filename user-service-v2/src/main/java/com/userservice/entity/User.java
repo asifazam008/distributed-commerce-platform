@@ -11,21 +11,36 @@ import java.util.Set;
 @Table(name = "users")
 public class User {
 
+    /**
+     * This is the external user identifier.
+     * Comes from JWT "sub"
+     */
     @Id
-    @Column(name = "user_id")
-    private String userId;   // comes from JWT "sub"
+    @Column(name = "user_id", nullable = false, updatable = false)
+    private String userId;
 
+    /**
+     * Human-readable username (email / login id)
+     */
     @Column(nullable = false, unique = true)
     private String username;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    /**
+     * User status (ACTIVE, SUSPENDED, DELETED)
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status;
+
+    /**
+     * Roles assigned to the user
+     * MUST be EAGER for authorization checks
+     */
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
-
-    @Column(nullable = false)
-    private String status;
 }
