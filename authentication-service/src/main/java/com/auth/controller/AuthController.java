@@ -1,7 +1,6 @@
 package com.auth.controller;
 
 import com.auth.dto.*;
-import com.auth.entity.User;
 import com.auth.repository.UserRepository;
 import com.auth.service.AuthService;
 import com.auth.util.JwtUtil;

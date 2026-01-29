@@ -1,5 +1,7 @@
 package com.apigateway.security;
 
+import com.apigateway.dto.AuthorizationRequest;
+import com.apigateway.dto.AuthorizationResponse;
 import com.apigateway.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +11,12 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
-import java.util.Arrays;
+import java.time.Duration;
 import java.util.List;
 
 @Component
@@ -23,23 +27,26 @@ public class JwtFilter implements GlobalFilter {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private WebClient webClient;
+
     private static final List<String> PUBLIC_URLS = List.of(
             "/auth/",
             "/actuator",
             "/public",
             "/orders/health",
             "/users/health",
-            "/internal"   // ✅ INTERNAL USER APIs
+            "/users/internal/" // allow calling authorize itself
     );
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getURI().getPath();
-        log.error(">>> RAW incoming request path = [{}]", path);
+        String method = exchange.getRequest().getMethod().name();
 
+        // Skip public endpoints
         if (PUBLIC_URLS.stream().anyMatch(path::startsWith)) {
-            log.debug("Path [{}] is excluded from JWT validation", path);
             return chain.filter(exchange);
         }
 
@@ -48,29 +55,40 @@ public class JwtFilter implements GlobalFilter {
                 .getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            log.warn("Unauthorized request to [{}] – Missing or invalid Authorization header", path);
             return unauthorized(exchange);
         }
 
         String token = authHeader.substring(7);
+
         if (!jwtUtil.isTokenValid(token)) {
-            log.warn("Unauthorized request to [{}] – Invalid or expired JWT token", path);
             return unauthorized(exchange);
         }
 
-        String username = jwtUtil.extractUsername(token);
-        String role = jwtUtil.extractRole(token);
+        String userId = jwtUtil.extractUsername(token);
 
-        boolean allowed = RbacConfig.isAccessAllowed(path, role);
-        if (!allowed) {
-            return forbidden(exchange);
-        }
+        // 🔐 CALL USER SERVICE FOR AUTHORIZATION
+        return webClient.post()
+                .uri("http://user-service/users/internal/authorize")
+                .bodyValue(new AuthorizationRequest(userId, method, path))
+                .retrieve()
+                .bodyToMono(AuthorizationResponse.class)
+                .timeout(Duration.ofSeconds(2))
+                .retryWhen(Retry.fixedDelay(1, Duration.ofMillis(200)))
+                .flatMap(res -> {
+                    if (!res.isAllowed()) {
+                        return forbidden(exchange);
+                    }
+                    return chain.filter(
+                            exchange.mutate()
+                                    .request(r -> r.header("X-Authenticated-User", userId))
+                                    .build()
+                    );
+                })
+                .onErrorResume(ex -> {
+                    log.error("Authorization service error for path {}: {}", path, ex.getMessage());
+                    return forbidden(exchange); // fail-closed
+                });
 
-        return chain.filter(exchange.mutate()
-                .request(r -> r
-                        .header("X-Authenticated-User", username)
-                        .header("X-User-Role", role))
-                .build());
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {

@@ -16,7 +16,8 @@ spring:
 
       # ================= HTTP CLIENT CONFIG =================
       httpclient:
-        response-timeout: 30s
+        connect-timeout: 2000
+        response-timeout: 2s
 
       # ================= DEFAULT FILTERS =================
       default-filters:
@@ -63,7 +64,6 @@ eureka:
     fetch-registry: true
     service-url:
       defaultZone: http://localhost:8761/eureka/
-
   instance:
     prefer-ip-address: true
     instance-id: ${spring.application.name}:${server.port}
